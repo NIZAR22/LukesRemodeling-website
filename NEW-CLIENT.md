@@ -59,7 +59,10 @@ All of them go in `public/images/` (icons in `public/`). Export JPEGs at quality
 | `hero.image` | 1920 × 1080 | Darkened behind the headline, so any good photo works |
 | `about.photo` | 800 × 1000 | Owner photo, portrait |
 | `images/og-image.jpg` | 1200 × 630 | Link previews (Facebook, texts) |
-| `images/projects/NN-name-before.jpg` / `-after.jpg` | 1200 × 900 | Same framing before and after; same size for both |
+| `images/projects/NN-name-before.jpg` / `-after.jpg` | 1200 × 900 | Same framing before and after; same size for both (`beforeSrc` / `afterSrc`) |
+| `images/projects/NN-name.jpg` | 1200 × 900 | A single finished photo with no matching before shot (`image`); shown with a "Finished" label |
+
+Each `projects` entry is **either** a before/after pair **or** a single `image`, never both (README → Gallery projects). Only pair photos you're sure show the same view before and after; in-progress shots aren't "before" photos. Crop to the card shape rather than enlarging small photos.
 
 Delete the template's `placeholder-*` images once nothing references them. To make a labelled placeholder for a photo that's still on its way (on Windows):
 

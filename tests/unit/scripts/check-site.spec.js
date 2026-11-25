@@ -44,6 +44,7 @@ function config (o = {}) {
     publicKey: 'pk_real',
     facebookUrl: 'https://www.facebook.com/example',
     social: "[{ name: 'Facebook', url: 'https://www.facebook.com/example', icon: 'mdi-facebook' }]",
+    projects: '[]',
     ...o
   }
   return [
@@ -62,7 +63,7 @@ function config (o = {}) {
     ...v.copy.map((text, i) => `  copy${i + 1}: '${text}',`),
     `  theme: { primary: '#1F2328', onPrimary: '#FFFFFF', accent: '${v.accent}', onAccent: '#1F2328', accentText: '#8F5A22', background: '#F7F4EF', surface: '#FFFFFF', text: '#1F2328', muted: '#5B616B' },`,
     '  modules: { gallery: false, quoteForm: true },',
-    '  projects: [],',
+    `  projects: ${v.projects},`,
     `  quoteForm: { emailjsPublicKey: '${v.publicKey}', emailjsServiceId: 'service_real', emailjsTemplateId: 'template_real', recaptchaSiteKey: 'site_key_real', photoMode: 'off', maxPhotos: 5 }`,
     '}',
     ''
@@ -255,6 +256,32 @@ describe('check-site.ps1 Facebook and social links', () => {
     const run = runCheck({ config: config({ facebookUrl: '', social: '[]' }) })
     expect(lines(run.out, 'FAIL')).toEqual([])
     expect(run.code).toBe(0)
+  })
+})
+
+describe('check-site.ps1 gallery projects', () => {
+  it('accepts single-photo cards mixed with before/after pairs', () => {
+    const run = runCheck({
+      config: config({
+        projects: "[{ title: 'Floor', category: 'Flooring', beforeSrc: 'images/b.jpg', afterSrc: 'images/a.jpg', alt: 'floor' }, " +
+          "{ title: 'Porch', category: 'Carpentry', image: 'images/p.jpg', alt: 'porch' }]"
+      })
+    })
+    expect(lines(run.out, 'FAIL')).toEqual([])
+    expect(run.code).toBe(0)
+  })
+
+  it('fails on an entry with neither image nor a full pair, or with both', () => {
+    const run = runCheck({
+      config: config({
+        projects: "[{ title: 'Half', category: 'X', beforeSrc: 'images/b.jpg', alt: 'x' }, " +
+          "{ title: 'Both', category: 'X', image: 'images/p.jpg', beforeSrc: 'images/b.jpg', afterSrc: 'images/a.jpg', alt: 'x' }]"
+      })
+    })
+    const fails = lines(run.out, 'FAIL').join('\n')
+    expect(fails).toMatch(/site-config\.js:\d+ {2}projects\[0\] \('Half'\) needs image \(a single finished photo\) or both beforeSrc and afterSrc/)
+    expect(fails).toMatch(/site-config\.js:\d+ {2}projects\[1\] \('Both'\) has both image and beforeSrc\/afterSrc/)
+    expect(run.code).toBe(1)
   })
 })
 

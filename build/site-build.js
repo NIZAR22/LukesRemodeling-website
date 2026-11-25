@@ -157,6 +157,63 @@ function validateTheme (theme) {
 }
 
 /**
+ * Whether a config value is a non-empty string (used for image paths)
+ * @param {*} value
+ * @returns {boolean}
+ */
+function hasPath (value) {
+  return typeof value === 'string' && value.trim() !== ''
+}
+
+/**
+ * Problems with the gallery entries in site.projects, one readable message
+ * each. A project is either a before/after pair (beforeSrc AND afterSrc,
+ * shown as a slider) or a single finished photo (image, shown as a card with
+ * a "Finished" label). Anything else is ambiguous or half-filled, and the
+ * gallery would show a broken or blank card, so it's reported.
+ *
+ * Checked even while modules.gallery is off, so a mistake can't sit unnoticed
+ * until the day the gallery is switched on.
+ * @param {object} site
+ * @returns {string[]}
+ */
+function projectProblems (site) {
+  const projects = site.projects
+  if (projects === undefined) return []
+  if (!Array.isArray(projects)) return ['site-config.js: projects must be a list ([]).']
+  const problems = []
+  projects.forEach((project, index) => {
+    const label = `site-config.js: projects[${index}]` + (project && project.title ? ` ('${project.title}')` : '')
+    if (!project || typeof project !== 'object') {
+      problems.push(`${label} must be an object with title, category, alt and either image or beforeSrc + afterSrc.`)
+      return
+    }
+    const image = hasPath(project.image)
+    const before = hasPath(project.beforeSrc)
+    const after = hasPath(project.afterSrc)
+    if (image && (before || after)) {
+      problems.push(`${label} has both image and beforeSrc/afterSrc. Use image for a single finished photo, or beforeSrc + afterSrc for a before/after pair, not both.`)
+    } else if (!image && !(before && after)) {
+      const missing = before ? 'afterSrc' : after ? 'beforeSrc' : 'image (or beforeSrc + afterSrc)'
+      problems.push(`${label} needs ${missing}. Each project is either a single finished photo (image) or a before/after pair (beforeSrc + afterSrc).`)
+    }
+  })
+  return problems
+}
+
+/**
+ * Throws a readable error listing every bad gallery entry, so a half-filled
+ * project fails the build instead of rendering a blank card
+ * @param {object} site
+ */
+function validateProjects (site) {
+  const problems = projectProblems(site)
+  if (problems.length) {
+    throw new Error(problems.join('\n'))
+  }
+}
+
+/**
  * CSS custom properties for the page <head>. Inlined at build time so the
  * very first paint already uses the client's colours and fonts: no flash of
  * the template defaults, and no extra request.
@@ -374,6 +431,8 @@ module.exports = {
   structuredDataScript,
   escapeHtml,
   validateTheme,
+  projectProblems,
+  validateProjects,
   themeCss,
   googleFontsUrl,
   pageHead,

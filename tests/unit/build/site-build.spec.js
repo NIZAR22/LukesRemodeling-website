@@ -10,7 +10,9 @@ import {
   searchEngineFiles,
   isLaunchReady,
   missingFormKeys,
-  assertFormKeys
+  assertFormKeys,
+  projectProblems,
+  validateProjects
 } from '../../../build/site-build'
 import { makeSite } from '../fixtures/site'
 
@@ -208,5 +210,42 @@ describe('form key guard', () => {
   it('lets the template repo through even if it were marked launchReady', () => {
     const site = makeSite({ quoteForm: { emailjsPublicKey: 'TODO key' } })
     expect(() => assertFormKeys(site, { template: true })).not.toThrow()
+  })
+})
+
+describe('validateProjects', () => {
+  const single = { title: 'Porch', category: 'Carpentry', image: 'images/p4.jpg', alt: 'porch' }
+  const pair = { title: 'Floor', category: 'Flooring', beforeSrc: 'images/b.jpg', afterSrc: 'images/a.jpg', alt: 'floor' }
+
+  it('accepts before/after pairs, single photos and mixed lists', () => {
+    expect(projectProblems(makeSite())).toEqual([])
+    expect(projectProblems(makeSite({ projects: [single] }))).toEqual([])
+    expect(projectProblems(makeSite({ projects: [pair, single] }))).toEqual([])
+    expect(projectProblems(makeSite({ projects: [] }))).toEqual([])
+    expect(() => validateProjects(makeSite({ projects: [pair, single] }))).not.toThrow()
+  })
+
+  it('rejects an entry with neither image nor a full pair, naming what is missing', () => {
+    const problems = projectProblems(makeSite({ projects: [{ title: 'Empty', category: 'X', alt: 'x' }] }))
+    expect(problems).toEqual([expect.stringContaining("projects[0] ('Empty') needs image (or beforeSrc + afterSrc)")])
+  })
+
+  it('rejects half a pair', () => {
+    const problems = projectProblems(makeSite({ projects: [{ ...pair, afterSrc: '' }] }))
+    expect(problems).toEqual([expect.stringContaining("projects[0] ('Floor') needs afterSrc")])
+  })
+
+  it('rejects an entry with both image and a pair', () => {
+    const problems = projectProblems(makeSite({ projects: [{ ...pair, image: 'images/p4.jpg' }] }))
+    expect(problems).toEqual([expect.stringContaining('has both image and beforeSrc/afterSrc')])
+  })
+
+  it('checks even while the gallery module is off', () => {
+    expect(projectProblems(makeSite({ modules: { gallery: false }, projects: [{ title: 'Empty' }] })).length).toBe(1)
+  })
+
+  it('throws one readable error listing every bad entry', () => {
+    const site = makeSite({ projects: [pair, { title: 'A' }, { ...single, beforeSrc: 'images/b.jpg' }] })
+    expect(() => validateProjects(site)).toThrow(/projects\[1\] \('A'\) needs[\s\S]*projects\[2\] \('Porch'\) has both/)
   })
 })

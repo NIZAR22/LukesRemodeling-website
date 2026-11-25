@@ -52,7 +52,7 @@ src/
     HeroSection.vue       headline, trust line, call/text/quote buttons
     ServicesSection.vue   service groups, footnote, "why choose us"
     ServiceAreaSection.vue
-    GallerySection.vue    category filters + BeforeAfterSlider.vue
+    GallerySection.vue    category filters, single-photo cards + BeforeAfterSlider.vue
     AboutSection.vue      owner photo, text, value badges
     ReviewsSection.vue    rating summary per source, review cards, review links
     FacebookFeed.vue      lazy-loaded Facebook Page Plugin with fallback card
@@ -79,7 +79,7 @@ Switch sections on and off in `SITE.modules`. The menu and the page follow autom
 |---|---|---|
 | `services` | Service groups, footnote, "why choose us" | `serviceGroups` |
 | `serviceArea` | Town list | `serviceArea` |
-| `gallery` | Before/after sliders with category filters | at least one entry in `projects` |
+| `gallery` | Before/after sliders and single "Finished" photo cards, with category filters | at least one entry in `projects` |
 | `about` | Owner photo, text, badges | `about` |
 | `reviews` | Rating summaries and review cards | at least one entry in `reviews` |
 | `facebookFeed` | Facebook Page Plugin, loaded only when scrolled near | `facebookUrl` |
@@ -104,6 +104,19 @@ Switch sections on and off in `SITE.modules`. The menu and the page follow autom
 
 - **Footer:** the business name, trust line (the licensing claim appears only when the flags allow it) and `footerDescription`; Quick Contact; Service Area plus Follow Us, which shows round buttons built from `SITE.social` (an empty list hides it). The bottom row has the copyright on the left and `serviceAreaSummary` on the right.
 - **Placeholder links:** `facebookUrl` and `SITE.social` ship with `TODO` placeholder URLs, so the template and previews show those sections. The check warns about them in preview and fails at launch. Empty values hide the sections.
+
+## Gallery projects
+
+Each entry in `SITE.projects` is one of two card types, in the same frame (`galleryImageSize`, 4:3 by default) and the same grid:
+
+```js
+// Before/after pair: a drag slider with "Before" / "After" labels
+{ title: 'Laundry Room Flooring', category: 'Flooring', beforeSrc: 'images/projects/01-laundry-before.jpg', afterSrc: 'images/projects/01-laundry-after.jpg', alt: 'Laundry room with new vinyl plank' }
+// Single finished photo: a card with a "Finished" label, no slider
+{ title: 'Porch Ceiling', category: 'Carpentry', image: 'images/projects/02-porch-ceiling.jpg', alt: 'Pine tongue-and-groove porch ceiling' }
+```
+
+Use a pair only when you have a real before shot of the same view; a finished-only photo goes in as `image`. Category filters treat both types the same. An entry with neither `image` nor both `beforeSrc` and `afterSrc`, or with both kinds, stops the build and fails `npm run check` with the entry's index and title. The "Drag the slider" line only appears when at least one pair is listed.
 
 Quote-form photos are set by `quoteForm.photoMode`:
 

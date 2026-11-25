@@ -29,6 +29,8 @@
     - Any string from scripts/blocklist.txt (other clients' names, phones and
       domains) anywhere in the shipped files, package.json or the root docs.
     - A theme colour pair below WCAG AA contrast (4.5:1).
+    - A projects entry that isn't exactly one of: a single finished photo
+      (image) or a before/after pair (beforeSrc + afterSrc).
     - A facebookUrl or social[].url that isn't an http(s) link (the page
       turns them into buttons; a bare name or "facebook.com/..." would be a
       broken link). Placeholder links with a TODO marker are fine here: the
@@ -455,6 +457,26 @@ foreach ($file in @($shippedText | Where-Object { $_ -match '\.(vue|html?)$' }))
       $line = ($content.Substring(0, $m.Index) -split "`n").Count
       Add-Warn $file $line '<img> without alt text'
     }
+  }
+}
+
+# Each gallery entry is either a single finished photo (image) or a
+# before/after pair (beforeSrc + afterSrc); anything else would render a
+# broken card. Same rule as validateProjects in build/site-build.js, checked
+# even while the gallery is off so a mistake can't wait for launch day.
+$projectsLine = Get-ConfigLine '^\s*projects\s*:'
+$index = 0
+foreach ($project in @($site.projects)) {
+  if ($null -eq $project) { continue }
+  $index++
+  $image = ([string] $project.image).Trim()
+  $beforeSrc = ([string] $project.beforeSrc).Trim()
+  $afterSrc = ([string] $project.afterSrc).Trim()
+  $label = "projects[$($index - 1)] ('$($project.title)')"
+  if ($image -and ($beforeSrc -or $afterSrc)) {
+    Add-Fail 'site-config.js' $projectsLine "$label has both image and beforeSrc/afterSrc; use image for a single finished photo or beforeSrc + afterSrc for a pair, not both"
+  } elseif (-not $image -and -not ($beforeSrc -and $afterSrc)) {
+    Add-Fail 'site-config.js' $projectsLine "$label needs image (a single finished photo) or both beforeSrc and afterSrc (a before/after pair)"
   }
 }
 

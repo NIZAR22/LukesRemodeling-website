@@ -1,7 +1,7 @@
 const path = require('path')
 const { defineConfig } = require('@vue/cli-service')
 const SITE = require('./site-config')
-const { pageHead, searchEngineFiles, assertFormKeys, validateTheme, isLaunchReady } = require('./build/site-build')
+const { pageHead, searchEngineFiles, assertFormKeys, validateTheme, validateProjects, isLaunchReady } = require('./build/site-build')
 
 /**
  * Vue CLI configuration for sites built from the nizar-starter-site template.
@@ -11,6 +11,10 @@ const { pageHead, searchEngineFiles, assertFormKeys, validateTheme, isLaunchRead
 
 // Fail early on a mistyped theme colour or font, whatever the build mode
 validateTheme(SITE.theme)
+
+// Every gallery entry must be either a single photo (image) or a before/after
+// pair (beforeSrc + afterSrc); a half-filled one would render a blank card
+validateProjects(SITE)
 
 // A launched site with unfinished quote-form keys would publish a form that
 // can't send, so stop the build. Preview builds (launchReady false) and the
