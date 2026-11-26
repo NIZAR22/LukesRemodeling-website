@@ -1,0 +1,7 @@
+# Other clients' names, phone numbers and domains. check-site.ps1 fails if any
+# of these appear in Luke's site, so nothing leaks over from another client.
+Tru Lawns
+TruLawns
+trulawns
+549-7011
+Wavecrest
