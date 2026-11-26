@@ -64,7 +64,13 @@ describe('QuoteForm.vue', () => {
       const wrapper = mountForm(makeSite({ quoteForm: { projectSizes: [], timelines: [] } }))
       const text = wrapper.text()
       expect(text).not.toContain('Project size')
-      expect(text).not.toContain('When do you need it done?')
+      expect(text).not.toContain('Timeline')
+    })
+
+    it('labels the timing field "Timeline (optional)"', () => {
+      // Short enough to fit the outlined select at 320px; the longer
+      // "When do you need it done? (optional)" was cut off with an ellipsis
+      expect(mountForm().text()).toContain('Timeline (optional)')
     })
 
     it('has a label for every visible field', () => {
