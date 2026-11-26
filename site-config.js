@@ -276,7 +276,8 @@ const SITE = {
     // 924x693 for 02-03; 04-06 come from 590 px Facebook copies, so they are
     // only 364x273 until Luke sends his originals.
     { title: 'Tongue-and-Groove Porch Ceiling', category: 'Carpentry', image: 'images/projects/02-porch-ceiling.jpg', alt: 'Covered brick patio with a knotty-pine tongue-and-groove ceiling above French doors' },
-    { title: 'Kitchen LVP Flooring', category: 'Flooring', image: 'images/projects/03-kitchen-lvp.jpg', alt: 'Galley kitchen with rustic wood-look luxury vinyl plank flooring between white shaker cabinets' },
+    // 03: Nizar's own 4:3 crop (kitchen-lvp-flooring.jpg), copied unchanged
+    { title: 'Kitchen LVP Flooring', category: 'Flooring', image: 'images/projects/03-kitchen-lvp-flooring.jpg', alt: 'Kitchen with light oak luxury vinyl plank flooring between white shaker cabinets and the range' },
     { title: 'Kitchen Subway Tile Backsplash', category: 'Kitchen & Bath', image: 'images/projects/04-kitchen-backsplash.jpg', alt: 'Glossy gray subway tile backsplash behind a stainless range, between white shaker cabinets and quartz counters' },
     { title: 'Coffee Bar Tile Backsplash', category: 'Kitchen & Bath', image: 'images/projects/05-coffee-bar-backsplash.jpg', alt: 'Gray subway tile backsplash under white shaker cabinets at a quartz-topped beverage bar' },
     { title: 'French Patio Doors', category: 'Repairs', image: 'images/projects/06-french-patio-doors.jpg', alt: 'White French patio doors in a navy dining-room wall' }
