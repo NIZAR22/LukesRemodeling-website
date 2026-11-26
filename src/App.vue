@@ -436,8 +436,25 @@ export default {
   }
 }
 
-/* Very narrow phones: drop the tagline so the name has room */
-@media (max-width: 360px) {
+/*
+  Phones and tablets (menu button showing, below DESKTOP_MIN_WIDTH): the
+  name wraps onto up to two lines instead of being cut off with an ellipsis,
+  and the tagline is dropped to make room (it's in the drawer header).
+  Two lines at this size (~37px) fit the 64px bar, so its height doesn't
+  change and the menu button and logo stay centred on the name.
+  The desktop rules above are untouched: there the menu-fit check measures
+  the name on one line.
+*/
+@media (max-width: 767px) {
+  .brand__name {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 1rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
   .brand__tagline {
     display: none;
   }

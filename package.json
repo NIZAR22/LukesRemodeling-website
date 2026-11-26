@@ -11,7 +11,8 @@
     "test:unit": "jest",
     "test:watch": "jest --watch",
     "check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-site.ps1",
-    "check:template": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-site.ps1 -AllowMarkers"
+    "check:template": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-site.ps1 -AllowMarkers",
+    "check:overflow": "node scripts/check-overflow.js"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

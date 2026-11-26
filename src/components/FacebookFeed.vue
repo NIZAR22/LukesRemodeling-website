@@ -26,6 +26,15 @@ export default {
 
   computed: {
     /**
+     * Whether the plugin iframe is on the page. Until it loads (and if it
+     * fails) the card is alone and takes the whole column.
+     * @returns {boolean}
+     */
+    showFrame () {
+      return this.load && !this.failed
+    },
+
+    /**
      * Facebook Page Plugin address, drawn at the measured column width
      * @returns {string}
      */
@@ -82,24 +91,44 @@ export default {
 </script>
 
 <style scoped>
+/*
+  minmax(0, ...) instead of 1fr / a fixed 500px: a plain 1fr track grows to
+  its widest child's natural width, so a plugin measured at 500px (page
+  loaded wide, then narrowed or rotated) pushed the card off a phone screen.
+  With a zero minimum and max-width: 100% on each child, nothing in the feed
+  can be wider than the column.
+*/
 .feed {
   display: grid;
   gap: 24px;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   justify-items: center;
+}
+
+.feed > * {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 @media (min-width: 900px) {
   .feed {
-    grid-template-columns: 500px 1fr;
+    grid-template-columns: minmax(0, 500px) minmax(0, 1fr);
     align-items: start;
+  }
+
+  /* Plugin hidden (not loaded yet) or failed: one column for the card */
+  .feed--solo {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
-/* Reserves the plugin's height up front so the page doesn't jump */
+/* Reserves the plugin's height up front so the page doesn't jump.
+   max-width beats the inline width set from frameWidth, so a stale
+   measurement can never make the frame wider than the column. */
 .feed__frame {
   width: 100%;
-  max-width: 500px;
+  max-width: min(100%, 500px);
   height: 600px;
   border: 0;
   border-radius: var(--radius);
@@ -108,19 +137,42 @@ export default {
 
 .fallback {
   width: 100%;
-  max-width: 500px;
+  max-width: min(100%, 500px);
   padding: 28px;
   text-align: center;
 }
 
-.fallback .mdi-facebook {
+/* Alone in the column: use all of it */
+.feed--solo .fallback {
+  max-width: 100%;
+}
+
+/* Only the large icon at the top of the card. The old selector
+   (.fallback .mdi-facebook) also matched the icon inside the Follow button
+   and painted it the button's own colour, so it was invisible. */
+.fallback__icon {
   font-size: 3rem;
   color: var(--color-primary);
 }
 
+/* Long business names wrap instead of running past the card */
 .fallback h3 {
   font-size: 1.4rem;
   margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+
+/* Phones: full-width button whose label can wrap */
+@media (max-width: 599px) {
+  .fallback {
+    padding: 24px 16px;
+  }
+
+  .fallback .btn {
+    display: flex;
+    width: 100%;
+    white-space: normal;
+  }
 }
 </style>
 
@@ -130,9 +182,9 @@ export default {
       <h2 id="facebook-title" class="section-title">Latest on Facebook</h2>
       <p class="section-lead">Recent jobs and updates from {{ site.businessName }}.</p>
 
-      <div ref="feed" class="feed">
+      <div ref="feed" :class="['feed', { 'feed--solo': !showFrame }]">
         <iframe
-          v-if="load && !failed"
+          v-if="showFrame"
           class="feed__frame"
           :style="{ width: frameWidth + 'px' }"
           :src="pluginUrl"
@@ -146,7 +198,7 @@ export default {
         <!-- Always present: the way to the page if the plugin is blocked,
              and the Follow button for everyone -->
         <div class="card fallback">
-          <span class="mdi mdi-facebook" aria-hidden="true"></span>
+          <span class="mdi mdi-facebook fallback__icon" aria-hidden="true"></span>
           <h3>{{ site.businessName }} on Facebook</h3>
           <p v-if="failed" class="muted" role="status">
             The Facebook feed couldn't load here (it's often blocked by privacy settings).

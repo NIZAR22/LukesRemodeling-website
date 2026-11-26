@@ -134,12 +134,15 @@ npm run serve     # http://localhost:8080 (uses Google's reCAPTCHA test key)
 npm run lint
 npm run test:unit
 npm run check     # leftover-content check (Windows PowerShell); in the template: npm run check:template
+npm run check:overflow  # with serve running: sideways overflow at 320/375/414px in headless Edge/Chrome
 npm run build     # production build into dist/
 ```
 
 `npm run build` prints which mode it's building. With `launchReady: false` it always succeeds, even with unfinished quote-form keys. With `launchReady: true` it stops if any key is still unfinished, except in the template repo itself, where the keys are placeholders on purpose.
 
 On macOS or Linux, run the check with `pwsh scripts/check-site.ps1`.
+
+`npm run check:overflow` loads the running site (default `http://localhost:8080/`; pass another URL and widths after `--`, e.g. `npm run check:overflow -- http://localhost:8081/ 320,375`) and fails if any element sticks out past a phone screen, even where the page hides the overflow. For the Facebook card it also compares each element's scrollWidth with its clientWidth, and repeats the check after loading at desktop width and then narrowing. Text clipped inside its own box, such as an ellipsis on a form label, is listed as a warning. jsdom has no layout, so the unit tests can't measure this. Set `CHROME_PATH` if Edge or Chrome isn't in a standard location.
 
 ## Updating client sites from the template
 
